@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Felolvasó</title>
+<style>
+  html { background-color: white; }
+</style>
+<script>
+window.mp3s = new Array();
+var paused = false;
+
+window.onload = function () {
+  addEventListener('rdy', function() {
+    if (speech.isPlaying != "true")
+      play_speech();
+  });
+};
+
+function stop_speech() {
+  document.getElementById("speechFlash").SetVariable("method:stop", "");
+}
+
+function pause_speech() {
+  if (paused) {
+    document.getElementById("speechFlash").SetVariable("method:play", "");
+    paused = false;
+  } else {
+    document.getElementById("speechFlash").SetVariable("method:pause", "");
+    paused = true;
+  }
+}
+
+function play_speech() {
+  var sobj = document.getElementById("speechFlash");
+  if (speech.url != window.mp3s[0]) {
+    sobj.SetVariable("method:setUrl", window.mp3s[0]);
+    sobj.SetVariable("enabled", "true");
+  }
+  sobj.SetVariable("method:play", "");
+  paused = false;
+}
+
+function say() {
+  if (!paused && speech.isPlaying != "true")
+    window.dispatchEvent(new Event('str'));
+  else
+    play_speech();
+}
+
+var speech = new Object();
+speech.onInit = function() { this.position = 0; };
+speech.onUpdate = function() {
+  if (this.isPlaying != "true" && !paused) {
+    window.mp3s.shift();
+    stop_speech();
+    if (window.mp3s.length > 0)
+      play_speech();
+  }
+};
+</script>
+</head>
+<body>
+<object id="speechFlash" type="application/x-shockwave-flash" data="player_mp3_js.swf" width="0" height="0">
+  <param name="movie" value="player_mp3_js.swf">
+  <param name="AllowScriptAccess" value="always">
+  <param name="FlashVars" value="listener=speech&amp;interval=200">
+</object>
+<select id="lang">
+  <option value="hu">Magyar</option>
+  <option value="en">Angol</option>
+  <option value="de">Német</option>
+  <option value="fr">Francia</option>
+  <option value="it">Olasz</option>
+  <option value="la">Latin</option>
+  <option value="es">Spanyol</option>
+  <option value="ru">Orosz</option>
+  <option value="de">Német</option>
+  <option value="jp">Japán</option>
+  <option value="zh-CN">Mandarin (egyszerűsített)</option>
+  <option value="zh-TW">Mandarin</option>
+</select><br>
+<textarea id="txt" rows="21" cols="74">Helló világ!</textarea><br>
+<button type="button" onclick="javascript:say();">Felolvasás</button>
+<button type="button" onclick="javascript:pause_speech();">Szünet</button>
+<button type="button" onclick="javascript:stop_speech();window.mp3s=[];">Megszakítás</button>
+</body>
+</html>
